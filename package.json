@@ -4,6 +4,10 @@
   "description": "Implements client features for enterprise integration of LoginShield",
   "main": "dist/main.js",
   "module": "src/main.js",
+  "files": [
+    "src",
+    "dist"
+  ],
   "scripts": {
     "clean": "exit 0",
     "lint": "eslint --fix src",
