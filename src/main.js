@@ -196,18 +196,31 @@ function getBackgroundColor(input) {
     return WHITE;
 }
 
+function getWidth(input) {
+    if (typeof input === 'number' && input >= 0) {
+        return input;
+    }
+    return 300;
+}
+
+function getHeight(input) {
+    if (typeof input === 'number' && input >= 0) {
+        return input;
+    }
+    return 400;
+}
+
 function getOriginFromURL(input) {
-    if(typeof URL === 'function') {
+    if (typeof URL === 'function') {
         // modern browser
         const url = new URL(input);
         return url.origin;
     }
-    else {
-        // should be supported by all browsers
-        const a = document.createElement('a');
-        a.href = input;
-        return a.origin;
-    }
+
+    // should be supported by all browsers
+    const a = document.createElement('a');
+    a.href = input;
+    return a.origin;
 }
 
 /*
@@ -222,6 +235,8 @@ export function loginshieldInit({
     onLogin, // function, callback when login is ready to be verified (will be provided the `verifyToken`)
     onError, // function, callback when login fails
     backgroundColor = '#ffffff',
+    width = '200',
+    height = '200',
     hidden = false,
 }) {
     console.log('loginshield: init');
@@ -240,10 +255,12 @@ export function loginshieldInit({
     const element = document.getElementById(elementId);
     // check the optional background color setting for the iframe
     const backgroundColorParam = getBackgroundColor(backgroundColor);
+    const widthParam = getWidth(width);
+    const heightParam = getHeight(height);
     // create the iframe
     iframe = document.createElement('iframe'); // iframe = document.getElementById('loginshield-enterprise');
     iframe.setAttribute('id', 'loginshield-enterprise');
-    iframe.setAttribute('src', `${iframeOrigin}/iframe/login/index.html?background-color=${encodeURIComponent(backgroundColorParam)}`);
+    iframe.setAttribute('src', `${iframeOrigin}/iframe/login/index.html?background-color=${encodeURIComponent(backgroundColorParam)}&width=${encodeURIComponent(widthParam)}&height=${encodeURIComponent(heightParam)}`);
     if (isIframeHidden) {
         // create the container for dynamic content like QR code, since the hidden iframe would not be displaying it
         container = document.createElement('div'); // container = document.getElementById('loginshield-container');
@@ -258,8 +275,8 @@ export function loginshieldInit({
         iframe.setAttribute('width', '1');
     } else {
         // NOTE: progress indicator will be shown inside the iframe
-        iframe.setAttribute('height', '400');
-        iframe.setAttribute('width', '400');
+        iframe.setAttribute('height', heightParam);
+        iframe.setAttribute('width', widthParam);
     }
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('scrolling', 'no');
