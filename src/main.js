@@ -197,17 +197,45 @@ function getBackgroundColor(input) {
 }
 
 function getWidth(input) {
+    if (typeof input === 'string' && input.endsWith('%')) {
+        const percent = parseInt(input);
+        if (percent < 0 || percent > 100) {
+            return '100%';
+        }
+        return input;
+    }
+    if (typeof input === 'string' && input.endsWith('px')) {
+        const pixels = parseInt(input);
+        if (pixels < 0) {
+            return '100%';
+        }
+        return input;
+    }
     if (typeof input === 'number' && input >= 0) {
         return input;
     }
-    return 300;
+    return '100%';
 }
 
 function getHeight(input) {
+    if (typeof input === 'string' && input.endsWith('%')) {
+        const percent = parseInt(input);
+        if (percent < 0 || percent > 100) {
+            return '100%';
+        }
+        return input;
+    }
+    if (typeof input === 'string' && input.endsWith('px')) {
+        const pixels = parseInt(input);
+        if (pixels < 0) {
+            return '100%';
+        }
+        return input;
+    }
     if (typeof input === 'number' && input >= 0) {
         return input;
     }
-    return 400;
+    return '100%';
 }
 
 function getOriginFromURL(input) {
@@ -235,8 +263,8 @@ export function loginshieldInit({
     onLogin, // function, callback when login is ready to be verified (will be provided the `verifyToken`)
     onError, // function, callback when login fails
     backgroundColor = '#ffffff',
-    width = '200',
-    height = '200',
+    width = '100%',
+    height = '100%',
     hidden = false,
 }) {
     console.log('loginshield: init');
