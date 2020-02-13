@@ -198,14 +198,14 @@ function getBackgroundColor(input) {
 
 function getWidth(input) {
     if (typeof input === 'string' && input.endsWith('%')) {
-        const percent = parseInt(input);
+        const percent = parseInt(input, 10);
         if (percent < 0 || percent > 100) {
             return '100%';
         }
         return input;
     }
     if (typeof input === 'string' && input.endsWith('px')) {
-        const pixels = parseInt(input);
+        const pixels = parseInt(input, 10);
         if (pixels < 0) {
             return '100%';
         }
@@ -219,14 +219,14 @@ function getWidth(input) {
 
 function getHeight(input) {
     if (typeof input === 'string' && input.endsWith('%')) {
-        const percent = parseInt(input);
+        const percent = parseInt(input, 10);
         if (percent < 0 || percent > 100) {
             return '100%';
         }
         return input;
     }
     if (typeof input === 'string' && input.endsWith('px')) {
-        const pixels = parseInt(input);
+        const pixels = parseInt(input, 10);
         if (pixels < 0) {
             return '100%';
         }
