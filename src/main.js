@@ -15,8 +15,12 @@ let loginshieldIframeHelloTimer = null;
 let isHelloDone = false;
 let loginshieldForwardURL = null; // url
 let loginshieldAction = null; // string 'start' or 'resume'
+let onResult = null; // application-provided callback function
+/*
 let loginshieldLoginCallback = null;
 let loginshieldErrorCallback = null;
+let loginshieldCancelCallback = null;
+*/
 let iframe = null;
 let container = null; // only initialized when isIframeHidden === true
 let isCssInit = false;
@@ -135,22 +139,27 @@ function handleMessage(e) {
             console.log('storing new client token');
             localStorage.setItem('loginshield.client.token', e.data.clientToken);
         }
-        if (e.data.image && isIframeHidden) {
+        if (e.data.qrcodeImageUri && isIframeHidden) {
             emptyContainer();
             // display the QR code
             const image = document.createElement('img');
             image.setAttribute('class', 'loginshield-display-image');
-            image.setAttribute('src', `data:image/png;base64,${e.data.image}`);
+            image.setAttribute('src', e.data.qrcodeImageUri);
             container.appendChild(image);
         }
         if (e.data.verifyToken) {
-            if (typeof loginshieldLoginCallback === 'function') {
-                loginshieldLoginCallback({ verifyToken: e.data.verifyToken });
+            if (typeof onResult === 'function') {
+                onResult({ status: 'verify', verifyToken: e.data.verifyToken });
             }
         }
         if (e.data.error) {
-            if (typeof loginshieldErrorCallback === 'function') {
-                loginshieldErrorCallback({ error: e.data.error });
+            if (typeof onResult === 'function') {
+                onResult({ status: 'error', error: e.data.error });
+            }
+        }
+        if (e.data.status === 'cancel') {
+            if (typeof onResult === 'function') {
+                onResult({ status: 'cancel' });
             }
         }
     }
@@ -260,8 +269,12 @@ export function loginshieldInit({
     elementId, // the iframe will be inserted as a child of '#elementId'
     forward, // url to loginshield interaction, required for start login and resume login
     action, // string 'start' or 'resume'
+    onResult: onResultFunction, // application-provided callback
+    /*
     onLogin, // function, callback when login is ready to be verified (will be provided the `verifyToken`)
     onError, // function, callback when login fails
+    onCancel, // function, callback when login is cancelled
+    */
     backgroundColor = '#ffffff',
     width = '100%',
     height = '100%',
@@ -275,8 +288,12 @@ export function loginshieldInit({
     console.log(`loginshield: iframe origin: ${iframeOrigin}`);
 
     isIframeHidden = hidden;
+    onResult = onResultFunction;
+    /*
     loginshieldLoginCallback = onLogin;
     loginshieldErrorCallback = onError;
+    loginshieldCancelCallback = onCancel;
+    */
     // remove iframe if already on page
     removeElement('loginshield-enterprise');
     // initialize the display
