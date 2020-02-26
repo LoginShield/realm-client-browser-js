@@ -15,6 +15,8 @@ let loginshieldIframeHelloTimer = null;
 let isHelloDone = false;
 let loginshieldForwardURL = null; // url
 let loginshieldAction = null; // string 'start' or 'resume'
+let loginshieldMode = null; // null or 'link-device' for new user or new device
+let loginshieldIsTrusted = null; // boolean
 let onResult = null; // application-provided callback function
 /*
 let loginshieldLoginCallback = null;
@@ -117,6 +119,8 @@ function loginshieldStartLogin() {
     loginshieldIframePostMessage({
         forward: loginshieldForwardURL,
         action: loginshieldAction,
+        mode: loginshieldMode,
+        isTrusted: loginshieldIsTrusted,
         clientToken,
         hidden: isIframeHidden, // when true, iframe will send postMessage with an image to display, instead of trying to display it inside the iframe
     });
@@ -269,6 +273,8 @@ export function loginshieldInit({
     elementId, // the iframe will be inserted as a child of '#elementId'
     forward, // url to loginshield interaction, required for start login and resume login
     action, // string 'start' or 'resume'
+    mode, // string 'link-device' or null
+    isTrusted, // boolean or null
     onResult: onResultFunction, // application-provided callback
     /*
     onLogin, // function, callback when login is ready to be verified (will be provided the `verifyToken`)
@@ -283,6 +289,8 @@ export function loginshieldInit({
     console.log('loginshield: init');
     loginshieldForwardURL = forward;
     loginshieldAction = action;
+    loginshieldMode = mode;
+    loginshieldIsTrusted = isTrusted;
 
     iframeOrigin = getOriginFromURL(forward);
     console.log(`loginshield: iframe origin: ${iframeOrigin}`);
