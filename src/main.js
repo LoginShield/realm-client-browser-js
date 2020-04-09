@@ -7,7 +7,7 @@ Copyright (C) 2019 Cryptium Corporation. All rights reserved.
 This script runs in the iframe loaded by the enterprise website.
 */
 
-console.log('loginshield: loaded enterprise-client-browser-js');
+console.log('loginshield-realm-client: loaded enterprise-client-browser-js');
 
 let iframeOrigin = null; // url, e.g. 'https://loginshield.com'
 let isIframeHidden = false;
@@ -16,7 +16,7 @@ let isHelloDone = false;
 let loginshieldForwardURL = null; // url
 let loginshieldAction = null; // string 'start' or 'resume'
 let loginshieldMode = null; // null or 'link-device' for new user or new device
-let loginshieldIsTrusted = null; // boolean
+let loginshieldRememberMe = null; // boolean
 let onResult = null; // application-provided callback function
 /*
 let loginshieldLoginCallback = null;
@@ -106,42 +106,66 @@ function loginshieldIframePostMessage(message) {
         is done.
         */
     } else {
-        console.error('loginshield: iframe not found by id: loginshield-enterprise');
+        console.error('loginshield-realm-client: iframe not found by id: loginshield-enterprise');
     }
 }
 function loginshieldStartLogin() {
     // get the client token, to access stored gateway information for this (client, domain)
     // combination (the domain is already implied by the browser's localStorage implementation,
-    // which provides a separate storage area for each domain)
+    // which provides a separate storage area for each domain);  resetting this token will
+    // cause the user's authenticator to display a safety notice until the new gateway public
+    // key becomes trusted
     const clientToken = localStorage.getItem('loginshield.client.token');
+
+    // resetting the rememberMe token will cause a QR code to be displayed instead of a
+    // push notification; however, even when rememberMe is disabled the token must be stored
+    // temporarily in case the authenticator displays a safety notice and the user follows
+    // the email link, because without it the resume action will fail; so when rememberMe is
+    // disabled we clear the rememberMeToken when login is done, to affect the next login
+    // (and if the login is incomplete and someone else tries to login as the same user, the
+    // QR code will be displayed anyway because the push notification is only allowed after
+    // one successful login)
+    const rememberMeToken = localStorage.getItem('loginshield.rememberMe.token');
 
     // send the challenge to iframe
     loginshieldIframePostMessage({
         forward: loginshieldForwardURL,
         action: loginshieldAction,
         mode: loginshieldMode,
-        isTrusted: loginshieldIsTrusted,
         clientToken,
+        rememberMeToken,
         hidden: isIframeHidden, // when true, iframe will send postMessage with an image to display, instead of trying to display it inside the iframe
     });
 }
 function handleMessage(e) {
     const dataJson = JSON.stringify(e.data);
-    console.log(`parent handleMessage origin ${e.origin} data ${dataJson}`);
+    console.log(`loginshield-realm-client: parent handleMessage origin ${e.origin} data ${dataJson}`);
     // skip messages not from the loginshield iframe
     if (e.origin !== iframeOrigin) {
         return;
     }
     if (e.data === 'hello') {
         // iframe replied to our hello
+        if (isHelloDone) {
+            // only accept one reply to avoid starting two or more concurrent login requests
+            console.log('loginshield-realm-client: hello already done');
+            return;
+        }
+        console.log('loginshield-realm-client: hello done, starting login request');
         isHelloDone = true;
-
         loginshieldStartLogin();
     }
     if (typeof e.data === 'object') {
         if (e.data.clientToken) {
-            console.log('storing new client token');
+            console.log('loginshield-realm-client: storing new client token');
             localStorage.setItem('loginshield.client.token', e.data.clientToken);
+        }
+        if (e.data.rememberMeToken) {
+            // NOTE: when we receive the token, we must store it in case the login request involves
+            // a redirect via email; when login is completed we will remove the token again
+            // (look for localStorage.removeItem in the verifyToken section below)
+            console.log('loginshield-realm-client: storing new rememberMe token');
+            localStorage.setItem('loginshield.rememberMe.token', e.data.rememberMeToken);
         }
         if (e.data.qrcodeImageUri && isIframeHidden) {
             emptyContainer();
@@ -152,6 +176,13 @@ function handleMessage(e) {
             container.appendChild(image);
         }
         if (e.data.verifyToken) {
+            console.log(`loginshield-realm-client: received verifyToken from iframe; rememberMe: ${loginshieldRememberMe}`);
+            if (!loginshieldRememberMe) {
+                // if rememberMe is disabled, protect the user's privacy by removing the token,
+                // which will enforce the setting on the next login
+                localStorage.removeItem('loginshield.rememberMe.token');
+            }
+
             if (typeof onResult === 'function') {
                 onResult({ status: 'verify', verifyToken: e.data.verifyToken });
             }
@@ -175,22 +206,22 @@ function loginshieldIframeCheckLoaded() {
         loginshieldIframeHelloTimer = null;
     }
     if (isHelloDone) {
-        console.log('loginshield iframe hello is done');
+        console.log('loginshield-realm-client: hello is already done');
         return;
     }
     loginshieldIframeHelloTimer = setTimeout(loginshieldIframeCheckLoaded, 500);
-    console.log(`loginshield iframe checking if loaded ${Date.now()}`);
+    console.log(`loginshield-realm-client: sending hello to iframe`); //  ${Date.now()}
     loginshieldIframePostMessage('hello');
 }
 function removeElement(elementId) {
     let element;
     do {
-        console.log(`loginshield: removing ${elementId}`);
+        console.log(`loginshield-realm-client: removing ${elementId}`);
         element = document.getElementById(elementId);
         if (element) {
-            console.log(`loginshield: found ${elementId}`);
+            console.log(`loginshield-realm-client: found ${elementId}`);
             element.parentNode.removeChild(element);
-            console.log(`loginshield: removed ${elementId}`);
+            console.log(`loginshield-realm-client: removed ${elementId}`);
         }
     } while (element);
 }
@@ -274,7 +305,7 @@ export function loginshieldInit({
     forward, // url to loginshield interaction, required for start login and resume login
     action, // string 'start' or 'resume'
     mode, // string 'link-device' or null
-    isTrusted, // boolean or null
+    rememberMe, // boolean or null (default false)
     onResult: onResultFunction, // application-provided callback
     /*
     onLogin, // function, callback when login is ready to be verified (will be provided the `verifyToken`)
@@ -286,14 +317,22 @@ export function loginshieldInit({
     height = '100%',
     hidden = false,
 }) {
-    console.log('loginshield: init');
+    console.log('loginshield-realm-client: init');
     loginshieldForwardURL = forward;
     loginshieldAction = action;
     loginshieldMode = mode;
-    loginshieldIsTrusted = isTrusted;
+    loginshieldRememberMe = !!rememberMe; // null or empty string or false -> false; other non-empty value -> true
+    console.log(`loginshield-realm-client: init: rememberMe: ${loginshieldRememberMe}`);
+
+    // if we are starting a new login request and rememberMe is false, clear the
+    // rememberMeToken to ensure the user gets a QR code
+    if (action === 'start' && !loginshieldRememberMe) {
+        console.log('loginshield-realm-client: action start and !rememberMe, removing token');
+        localStorage.removeItem('loginshield.rememberMe.token');
+    }
 
     iframeOrigin = getOriginFromURL(forward);
-    console.log(`loginshield: iframe origin: ${iframeOrigin}`);
+    console.log(`loginshield-realm-client: iframe origin: ${iframeOrigin}`);
 
     isIframeHidden = hidden;
     onResult = onResultFunction;
