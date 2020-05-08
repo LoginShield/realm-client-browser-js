@@ -127,6 +127,9 @@ function loginshieldStartLogin() {
     // one successful login)
     const rememberMeToken = localStorage.getItem('loginshield.rememberMe.token');
 
+    console.log(`loginshield-realm-client: rememberMeToken ${rememberMeToken}`);
+    console.log(`loginshield-realm-client: clientToken ${clientToken}`);
+
     // send the challenge to iframe
     loginshieldIframePostMessage({
         forward: loginshieldForwardURL,
