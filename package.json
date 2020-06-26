@@ -37,6 +37,7 @@
     "url": "https://github.com/cryptiumtech/tigercomet-client-browser-js/issues"
   },
   "homepage": "https://github.com/cryptiumtech/tigercomet-client-browser-js#readme",
+  "license": "BSD-2-Clause",
   "dependencies": {
     "axios": "^0.19.0"
   },
