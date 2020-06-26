@@ -1,9 +1,12 @@
-enterprise-client-browser-js
-============================
+realm-client-browser-js
+=======================
 
-A client library for enterprise integration of LoginShield authentication.
+Front-end part of LoginShield SDK for direct integration into a web application.
 
-Build:
+This library integrates into the website front-end JavaScript.
+
+
+# Build
 
 ```
 npm run lint
