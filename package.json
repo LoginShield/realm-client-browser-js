@@ -1,5 +1,5 @@
 {
-  "name": "@cryptium/tigercomet-realm-client-browser",
+  "name": "@loginshield/realm-client-browser",
   "version": "0.1.0",
   "description": "Browser integration for authentication realm",
   "main": "dist/main.umd.js",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cryptiumtech/tigercomet-realm-client-browser-js.git"
+    "url": "git+https://github.com/loginshield/realm-client-browser-js.git"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -29,14 +29,14 @@
     "enterprise",
     "sdk"
   ],
-  "author": "Cryptium <someone@cryptium.org> (https://cryptium.com)",
+  "author": "Cryptium <someone@cryptium.com> (https://cryptium.com)",
   "contributors": [
-    "Jonathan Buhacoff <jonathan@cryptium.org>"
+    "Jonathan Buhacoff <jonathan@cryptium.com> (https://github.com/jbuhacoff)"
   ],
   "bugs": {
-    "url": "https://github.com/cryptiumtech/tigercomet-client-browser-js/issues"
+    "url": "https://github.com/loginshield/realm-client-browser-js/issues"
   },
-  "homepage": "https://github.com/cryptiumtech/tigercomet-client-browser-js#readme",
+  "homepage": "https://github.com/loginshield/realm-client-browser-js#readme",
   "license": "BSD-2-Clause",
   "dependencies": {
     "axios": "^0.19.0"

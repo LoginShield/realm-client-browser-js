@@ -10,16 +10,5 @@ This library integrates into the website front-end JavaScript.
 
 ```
 npm run lint
-```
-
-Run all tests:
-
-```
-npm test
-```
-
-How to run a single test file:
-
-```
-npx mocha test/unit/example.js
+npm run build
 ```
