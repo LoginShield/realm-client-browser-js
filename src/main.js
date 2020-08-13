@@ -213,7 +213,7 @@ function loginshieldIframeCheckLoaded() {
         return;
     }
     loginshieldIframeHelloTimer = setTimeout(loginshieldIframeCheckLoaded, 500);
-    console.log(`loginshield-realm-client: sending hello to iframe`); //  ${Date.now()}
+    console.log('loginshield-realm-client: sending hello to iframe'); //  ${Date.now()}
     loginshieldIframePostMessage('hello');
 }
 function removeElement(elementId) {
@@ -352,10 +352,11 @@ export function loginshieldInit({
     const backgroundColorParam = getBackgroundColor(backgroundColor);
     const widthParam = getWidth(width);
     const heightParam = getHeight(height);
+    const timestamp = Date.now(); // force browser to reload index.html without using cache; then if index.html has not changed it will point to the same js and css files and the browser can use cache for those
     // create the iframe
     iframe = document.createElement('iframe'); // iframe = document.getElementById('loginshield-enterprise');
     iframe.setAttribute('id', 'loginshield-enterprise');
-    iframe.setAttribute('src', `${iframeOrigin}/iframe/login/index.html?background-color=${encodeURIComponent(backgroundColorParam)}&width=${encodeURIComponent(widthParam)}&height=${encodeURIComponent(heightParam)}`);
+    iframe.setAttribute('src', `${iframeOrigin}/iframe/login/index.html?background-color=${encodeURIComponent(backgroundColorParam)}&width=${encodeURIComponent(widthParam)}&height=${encodeURIComponent(heightParam)}&timestamp=${encodeURIComponent(timestamp)}`);
     if (isIframeHidden) {
         // create the container for dynamic content like QR code, since the hidden iframe would not be displaying it
         container = document.createElement('div'); // container = document.getElementById('loginshield-container');
