@@ -356,7 +356,7 @@ export function loginshieldInit({
     // create the iframe
     iframe = document.createElement('iframe'); // iframe = document.getElementById('loginshield-enterprise');
     iframe.setAttribute('id', 'loginshield-enterprise');
-    iframe.setAttribute('src', `${iframeOrigin}/iframe/login/index.html?background-color=${encodeURIComponent(backgroundColorParam)}&width=${encodeURIComponent(widthParam)}&height=${encodeURIComponent(heightParam)}&timestamp=${encodeURIComponent(timestamp)}`);
+    iframe.setAttribute('src', `${iframeOrigin}/iframe/login/index.html?background-color=${encodeURIComponent(backgroundColorParam)}&width=${encodeURIComponent(widthParam)}&height=${encodeURIComponent(heightParam)}&t=${encodeURIComponent(timestamp)}`);
     if (isIframeHidden) {
         // create the container for dynamic content like QR code, since the hidden iframe would not be displaying it
         container = document.createElement('div'); // container = document.getElementById('loginshield-container');
